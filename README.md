@@ -135,8 +135,6 @@ Your job is to implement a `TipWall` contract with:
   pragma solidity ^0.8.24;
   ```
 
-````
-
 * A contract is like a class:
 
   ```solidity
@@ -479,4 +477,3 @@ git push
 ## License
 
 MIT
-````
