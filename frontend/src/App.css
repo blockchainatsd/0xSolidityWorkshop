@@ -1,0 +1,268 @@
+:root {
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --bg: #0f0f0f;
+  --card-bg: #1a1a1a;
+  --text: #f5f5f5;
+  --text-muted: #888;
+  --border: #333;
+  --success: #22c55e;
+  --warning: #eab308;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.app {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--text-muted);
+}
+
+section {
+  margin-bottom: 2rem;
+}
+
+/* Wallet Section */
+.wallet-section {
+  display: flex;
+  justify-content: center;
+}
+
+.connect-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.connect-btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.connect-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.connected {
+  background: var(--card-bg);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--success);
+}
+
+.address {
+  font-family: monospace;
+  color: var(--success);
+}
+
+/* Info Section */
+.info-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.info-card {
+  background: var(--card-bg);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.info-card h3 {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.info-card code {
+  font-size: 0.75rem;
+  word-break: break-all;
+}
+
+.info-card .amount {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--warning);
+}
+
+/* Tip Form */
+.tip-form-section {
+  background: var(--card-bg);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.tip-form-section h2 {
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.tip-form-section button {
+  width: 100%;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tip-form-section button:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.tip-form-section button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.status {
+  text-align: center;
+  margin-top: 1rem;
+  color: var(--text-muted);
+}
+
+/* Withdraw Section */
+.withdraw-section {
+  background: var(--card-bg);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--warning);
+}
+
+.withdraw-btn {
+  background: var(--warning);
+  color: black;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* Tips Section */
+.tips-section h2 {
+  margin-bottom: 1rem;
+}
+
+.no-tips {
+  color: var(--text-muted);
+  text-align: center;
+  padding: 2rem;
+  background: var(--card-bg);
+  border-radius: 12px;
+}
+
+.tips-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tip-item {
+  background: var(--card-bg);
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.tip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.tip-from {
+  font-family: monospace;
+  color: var(--primary);
+  font-size: 0.875rem;
+}
+
+.tip-amount {
+  font-weight: 600;
+  color: var(--warning);
+}
+
+.tip-message {
+  margin-bottom: 0.5rem;
+}
+
+.tip-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .app {
+    padding: 1rem;
+  }
+
+  header h1 {
+    font-size: 2rem;
+  }
+}
