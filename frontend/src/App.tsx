@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { formatEther, parseEther } from 'viem';
 import { publicClient, createWalletClientFromProvider, connectWallet } from './viem';
-// TODO: Import the ABI after running `node scripts/sync.mjs`
-// import abi from './abi/TipWall.json';
+import abi from './abi/TipWall.json';
 
 import './App.css';
 
@@ -26,26 +25,19 @@ function App() {
   const [totalTipped, setTotalTipped] = useState<bigint>(0n);
   const [tips, setTips] = useState<Tip[]>([]);
   const [owner, setOwner] = useState<`0x${string}` | null>(null);
+  const [contractBalance, setContractBalance] = useState<bigint>(0n);
 
   // Form state
   const [message, setMessage] = useState('');
   const [amount, setAmount] = useState('0.01');
   const [isSending, setIsSending] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   // Status messages
   const [status, setStatus] = useState('');
 
-  // TODO: Uncomment after sync.mjs runs and you have the ABI
-  // const abi = [...]; // Import from './abi/TipWall.json'
-
   /**
-   * TODO: Load contract data
-   * 
-   * Use publicClient.readContract to read:
-   * - totalTipped()
-   * - tipCount()
-   * - owner()
-   * - Loop through tips with getTip(i)
+   * Load contract data
    */
   const loadContractData = useCallback(async () => {
     if (!CONTRACT_ADDRESS) {
@@ -53,16 +45,60 @@ function App() {
       return;
     }
 
-    // TODO: Implement reading contract state
-    // Example:
-    // const total = await publicClient.readContract({
-    //   address: CONTRACT_ADDRESS,
-    //   abi,
-    //   functionName: 'totalTipped',
-    // });
-    // setTotalTipped(total as bigint);
-    
-    console.log('TODO: Implement loadContractData');
+    try {
+      // Read totalTipped
+      const total = await publicClient.readContract({
+        address: CONTRACT_ADDRESS,
+        abi,
+        functionName: 'totalTipped',
+      });
+      setTotalTipped(total as bigint);
+
+      // Read owner
+      const ownerAddr = await publicClient.readContract({
+        address: CONTRACT_ADDRESS,
+        abi,
+        functionName: 'owner',
+      });
+      setOwner(ownerAddr as `0x${string}`);
+
+      // Read contract balance
+      const balance = await publicClient.readContract({
+        address: CONTRACT_ADDRESS,
+        abi,
+        functionName: 'contractBalance',
+      });
+      setContractBalance(balance as bigint);
+
+      // Read tip count
+      const count = await publicClient.readContract({
+        address: CONTRACT_ADDRESS,
+        abi,
+        functionName: 'tipCount',
+      });
+      const tipCount = Number(count);
+
+      // Fetch all tips
+      const fetchedTips: Tip[] = [];
+      for (let i = 0; i < tipCount; i++) {
+        const tipData = await publicClient.readContract({
+          address: CONTRACT_ADDRESS,
+          abi,
+          functionName: 'getTip',
+          args: [BigInt(i)],
+        }) as readonly [string, bigint, number, string];
+        
+        fetchedTips.push({
+          from: tipData[0] as `0x${string}`,
+          amount: tipData[1],
+          timestamp: Number(tipData[2]),
+          message: tipData[3],
+        });
+      }
+      setTips(fetchedTips);
+    } catch (error) {
+      console.error('Failed to load contract data:', error);
+    }
   }, []);
 
   /**
@@ -83,79 +119,100 @@ function App() {
   };
 
   /**
-   * TODO: Send tip handler
-   * 
-   * Use walletClient.writeContract to call:
-   * - tip(message) with value: parseEther(amount)
-   * 
-   * Then use publicClient.waitForTransactionReceipt to wait for confirmation.
+   * Send tip handler
    */
   const handleSendTip = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!account || !message || !amount) return;
+    if (!account || !message || !amount || !CONTRACT_ADDRESS) return;
 
     setIsSending(true);
     setStatus('Sending tip...');
 
     try {
-      // TODO: Implement sending a tip
-      // const walletClient = await createWalletClientFromProvider();
-      // const hash = await walletClient.writeContract({
-      //   address: CONTRACT_ADDRESS,
-      //   abi,
-      //   functionName: 'tip',
-      //   args: [message],
-      //   value: parseEther(amount),
-      //   account,
-      // });
-      // 
-      // setStatus('Waiting for confirmation...');
-      // await publicClient.waitForTransactionReceipt({ hash });
-      // setStatus('Tip sent!');
-      // setMessage('');
-      // await loadContractData();
-      
-      console.log('TODO: Implement handleSendTip');
-      setStatus('TODO: Implement handleSendTip');
+      const walletClient = await createWalletClientFromProvider();
+      const hash = await walletClient.writeContract({
+        address: CONTRACT_ADDRESS,
+        abi,
+        functionName: 'tip',
+        args: [message],
+        value: parseEther(amount),
+        account,
+      });
+
+      setStatus('Waiting for confirmation...');
+      await publicClient.waitForTransactionReceipt({ hash });
+      setStatus('Tip sent successfully! 🎉');
+      setMessage('');
+      await loadContractData();
     } catch (error) {
       console.error('Failed to send tip:', error);
-      setStatus('Failed to send tip');
+      setStatus('Failed to send tip. Check console for details.');
     } finally {
       setIsSending(false);
     }
   };
 
   /**
-   * TODO: Withdraw handler (owner only)
+   * Withdraw handler (owner only)
    */
   const handleWithdraw = async () => {
-    // TODO: Implement withdraw for owner
-    console.log('TODO: Implement handleWithdraw');
+    if (!account || !CONTRACT_ADDRESS) return;
+
+    setIsWithdrawing(true);
+    setStatus('Withdrawing...');
+
+    try {
+      const walletClient = await createWalletClientFromProvider();
+      const hash = await walletClient.writeContract({
+        address: CONTRACT_ADDRESS,
+        abi,
+        functionName: 'withdraw',
+        account,
+      });
+
+      setStatus('Waiting for confirmation...');
+      await publicClient.waitForTransactionReceipt({ hash });
+      setStatus('Withdrawal successful! 💰');
+      await loadContractData();
+    } catch (error) {
+      console.error('Failed to withdraw:', error);
+      setStatus('Failed to withdraw. Check console for details.');
+    } finally {
+      setIsWithdrawing(false);
+    }
   };
 
   /**
-   * TODO: Subscribe to NewTip events
-   * 
-   * Use publicClient.watchContractEvent to listen for NewTip events
-   * and update the UI in real-time.
+   * Subscribe to NewTip events for real-time updates
    */
   useEffect(() => {
     if (!CONTRACT_ADDRESS) return;
 
-    // TODO: Implement event subscription
-    // const unwatch = publicClient.watchContractEvent({
-    //   address: CONTRACT_ADDRESS,
-    //   abi,
-    //   eventName: 'NewTip',
-    //   onLogs: (logs) => {
-    //     logs.forEach(log => {
-    //       const { from, amount, timestamp, message } = log.args;
-    //       // Update tips state
-    //     });
-    //   },
-    // });
-    // 
-    // return () => unwatch();
+    const unwatch = publicClient.watchContractEvent({
+      address: CONTRACT_ADDRESS,
+      abi,
+      eventName: 'NewTip',
+      onLogs: (logs) => {
+        logs.forEach(log => {
+          const args = log.args as {
+            from: `0x${string}`;
+            amount: bigint;
+            timestamp: number;
+            message: string;
+          };
+          const newTip: Tip = {
+            from: args.from,
+            amount: args.amount,
+            timestamp: Number(args.timestamp),
+            message: args.message,
+          };
+          setTips(prev => [...prev, newTip]);
+          setTotalTipped(prev => prev + args.amount);
+        });
+      },
+    });
+
+    return () => unwatch();
   }, []);
 
   // Load data on mount
@@ -196,6 +253,14 @@ function App() {
         <div className="info-card">
           <h3>Total Tipped</h3>
           <span className="amount">{formatEther(totalTipped)} ETH</span>
+        </div>
+        <div className="info-card">
+          <h3>Contract Balance</h3>
+          <span className="amount">{formatEther(contractBalance)} ETH</span>
+        </div>
+        <div className="info-card">
+          <h3>Number of Tips</h3>
+          <span className="amount">{tips.length}</span>
         </div>
       </section>
 
@@ -240,8 +305,13 @@ function App() {
       {account && owner && account.toLowerCase() === owner.toLowerCase() && (
         <section className="withdraw-section">
           <h2>Owner Controls</h2>
-          <button onClick={handleWithdraw} className="withdraw-btn">
-            Withdraw Balance
+          <p>You are the contract owner.</p>
+          <button 
+            onClick={handleWithdraw} 
+            className="withdraw-btn"
+            disabled={isWithdrawing || contractBalance === 0n}
+          >
+            {isWithdrawing ? 'Withdrawing...' : `Withdraw ${formatEther(contractBalance)} ETH`}
           </button>
         </section>
       )}

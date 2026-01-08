@@ -8,16 +8,12 @@ contract Deploy is Script {
     function setUp() public {}
 
     function run() public {
-        // TODO: Use vm.startBroadcast() to start the deployment
-        // Hint: vm.startBroadcast();
+        vm.startBroadcast();
         
-        // TODO: Deploy the TipWall contract
-        // Hint: TipWall tipWall = new TipWall();
+        TipWall tipWall = new TipWall();
         
-        // TODO: Log the deployed address
-        // Hint: console.log("TipWall deployed at:", address(tipWall));
+        console.log("TipWall deployed at:", address(tipWall));
         
-        // TODO: Use vm.stopBroadcast() to stop the deployment
-        // Hint: vm.stopBroadcast();
+        vm.stopBroadcast();
     }
 }
