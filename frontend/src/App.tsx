@@ -26,6 +26,7 @@ function App() {
   const [totalTipped, setTotalTipped] = useState<bigint>(0n);
   const [tips, setTips] = useState<Tip[]>([]);
   const [owner, setOwner] = useState<`0x${string}` | null>(null);
+  const [contractBalance, setContractBalance] = useState<bigint>(0n);
 
   // Form state
   const [message, setMessage] = useState('');
@@ -52,7 +53,7 @@ function App() {
     }
 
     try {
-      const [total, count, contractOwner] = await Promise.all([
+      const [total, count, contractOwner, balance] = await Promise.all([
         publicClient.readContract({
           address: CONTRACT_ADDRESS,
           abi,
@@ -68,6 +69,11 @@ function App() {
           abi,
           functionName: 'owner',
         }) as Promise<`0x${string}`>,
+        publicClient.readContract({
+          address: CONTRACT_ADDRESS,
+          abi,
+          functionName: 'contractBalance',
+        }) as Promise<bigint>,
       ]);
 
       const countNumber = Number(count);
@@ -85,6 +91,7 @@ function App() {
       setTotalTipped(total);
       setOwner(contractOwner);
       setTips(loadedTips);
+      setContractBalance(balance);
     } catch (error) {
       console.error('Failed to load contract data:', error);
       setStatus('Failed to load contract data');
@@ -291,6 +298,7 @@ function App() {
       {account && owner && account.toLowerCase() === owner.toLowerCase() && (
         <section className="withdraw-section">
           <h2>Owner Controls</h2>
+          <p className="balance">Contract Balance: {formatEther(contractBalance)} ETH</p>
           <button onClick={handleWithdraw} className="withdraw-btn">
             Withdraw Balance
           </button>
