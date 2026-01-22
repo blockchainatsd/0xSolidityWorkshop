@@ -148,16 +148,13 @@ function App() {
     //   address: CONTRACT_ADDRESS,
     //   abi,
     //   eventName: 'NewTip',
-    //   onLogs: (logs) => {
-    //     logs.forEach(log => {
-    //       const { from, amount, timestamp, message } = log.args;
-    //       // Update tips state
-    //     });
+    //   onLogs: () => {
+    //     loadContractData();
     //   },
     // });
     // 
     // return () => unwatch();
-  }, []);
+  }, [CONTRACT_ADDRESS, loadContractData]);
 
   // Load data on mount
   useEffect(() => {
