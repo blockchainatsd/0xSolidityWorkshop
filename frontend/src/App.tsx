@@ -36,9 +36,6 @@ function App() {
   // Status messages
   const [status, setStatus] = useState('');
 
-  // TODO: Uncomment after sync.mjs runs and you have the ABI
-  // const abi = [...]; // Import from './abi/TipWall.json'
-
   /**
    * TODO: Load contract data
    * 
