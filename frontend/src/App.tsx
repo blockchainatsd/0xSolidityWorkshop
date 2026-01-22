@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { formatEther, parseEther } from 'viem';
 import { publicClient, createWalletClientFromProvider, connectWallet } from './viem';
-// TODO: Import the ABI after running `node scripts/sync.mjs`
-// import abi from './abi/TipWall.json';
+import abi from './abi/TipWall.json';
 
 import './App.css';
 
@@ -36,8 +35,6 @@ function App() {
   // Status messages
   const [status, setStatus] = useState('');
 
-  // TODO: Uncomment after sync.mjs runs and you have the ABI
-  // const abi = [...]; // Import from './abi/TipWall.json'
 
   /**
    * TODO: Load contract data
@@ -54,17 +51,45 @@ function App() {
       return;
     }
 
-    // TODO: Implement reading contract state
-    // Example:
-    // const total = await publicClient.readContract({
-    //   address: CONTRACT_ADDRESS,
-    //   abi,
-    //   functionName: 'totalTipped',
-    // });
-    // setTotalTipped(total as bigint);
-    
-    console.log('TODO: Implement loadContractData');
-  }, []);
+    try {
+      const [total, count, contractOwner] = await Promise.all([
+        publicClient.readContract({
+          address: CONTRACT_ADDRESS,
+          abi,
+          functionName: 'totalTipped',
+        }) as Promise<bigint>,
+        publicClient.readContract({
+          address: CONTRACT_ADDRESS,
+          abi,
+          functionName: 'tipCount',
+        }) as Promise<bigint>,
+        publicClient.readContract({
+          address: CONTRACT_ADDRESS,
+          abi,
+          functionName: 'owner',
+        }) as Promise<`0x${string}`>,
+      ]);
+
+      const countNumber = Number(count);
+      const tipPromises = Array.from({ length: countNumber }, (_, offset) =>
+        publicClient.readContract({
+          address: CONTRACT_ADDRESS,
+          abi,
+          functionName: 'getTip',
+          args: [BigInt(offset)],
+        }) as Promise<Tip>
+      );
+
+      const loadedTips = await Promise.all(tipPromises);
+
+      setTotalTipped(total);
+      setOwner(contractOwner);
+      setTips(loadedTips);
+    } catch (error) {
+      console.error('Failed to load contract data:', error);
+      setStatus('Failed to load contract data');
+    }
+  }, [CONTRACT_ADDRESS]);
 
   /**
    * Connect wallet handler
@@ -94,30 +119,30 @@ function App() {
   const handleSendTip = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!account || !message || !amount) return;
+    if (!CONTRACT_ADDRESS) {
+      setStatus('Contract address not set. Run sync.mjs first.');
+      return;
+    }
 
     setIsSending(true);
     setStatus('Sending tip...');
 
     try {
-      // TODO: Implement sending a tip
-      // const walletClient = await createWalletClientFromProvider();
-      // const hash = await walletClient.writeContract({
-      //   address: CONTRACT_ADDRESS,
-      //   abi,
-      //   functionName: 'tip',
-      //   args: [message],
-      //   value: parseEther(amount),
-      //   account,
-      // });
-      // 
-      // setStatus('Waiting for confirmation...');
-      // await publicClient.waitForTransactionReceipt({ hash });
-      // setStatus('Tip sent!');
-      // setMessage('');
-      // await loadContractData();
-      
-      console.log('TODO: Implement handleSendTip');
-      setStatus('TODO: Implement handleSendTip');
+      const walletClient = await createWalletClientFromProvider();
+      const hash = await walletClient.writeContract({
+        address: CONTRACT_ADDRESS,
+        abi,
+        functionName: 'tip',
+        args: [message],
+        value: parseEther(amount),
+        account,
+      });
+
+      setStatus('Waiting for confirmation...');
+      await publicClient.waitForTransactionReceipt({ hash });
+      setStatus('Tip sent!');
+      setMessage('');
+      await loadContractData();
     } catch (error) {
       console.error('Failed to send tip:', error);
       setStatus('Failed to send tip');
@@ -130,8 +155,37 @@ function App() {
    * TODO: Withdraw handler (owner only)
    */
   const handleWithdraw = async () => {
-    // TODO: Implement withdraw for owner
-    console.log('TODO: Implement handleWithdraw');
+    if (!account) {
+      setStatus('Connect wallet first');
+      return;
+    }
+    if (!CONTRACT_ADDRESS) {
+      setStatus('Contract address not set. Run sync.mjs first.');
+      return;
+    }
+
+    setIsSending(true);
+    setStatus('Withdrawing...');
+
+    try {
+      const walletClient = await createWalletClientFromProvider();
+      const hash = await walletClient.writeContract({
+        address: CONTRACT_ADDRESS,
+        abi,
+        functionName: 'withdraw',
+        account,
+      });
+
+      setStatus('Waiting for confirmation...');
+      await publicClient.waitForTransactionReceipt({ hash });
+      setStatus('Withdraw complete');
+      await loadContractData();
+    } catch (error) {
+      console.error('Failed to withdraw:', error);
+      setStatus('Failed to withdraw');
+    } finally {
+      setIsSending(false);
+    }
   };
 
   /**
@@ -143,21 +197,29 @@ function App() {
   useEffect(() => {
     if (!CONTRACT_ADDRESS) return;
 
-    // TODO: Implement event subscription
-    // const unwatch = publicClient.watchContractEvent({
-    //   address: CONTRACT_ADDRESS,
-    //   abi,
-    //   eventName: 'NewTip',
-    //   onLogs: (logs) => {
-    //     logs.forEach(log => {
-    //       const { from, amount, timestamp, message } = log.args;
-    //       // Update tips state
-    //     });
-    //   },
-    // });
-    // 
-    // return () => unwatch();
-  }, []);
+    const unwatch = publicClient.watchContractEvent({
+      address: CONTRACT_ADDRESS,
+      abi,
+      eventName: 'NewTip',
+      onLogs: (logs) => {
+        logs.forEach((log) => {
+          const { from, amount, timestamp, message } = log.args as {
+            from: `0x${string}`;
+            amount: bigint;
+            timestamp: bigint;
+            message: string;
+          };
+
+          const newTip: Tip = { from, amount, timestamp, message };
+
+          setTips((prev) => [...prev, newTip]);
+          setTotalTipped((prev) => prev + amount);
+        });
+      },
+    });
+
+    return () => unwatch();
+  }, [CONTRACT_ADDRESS]);
 
   // Load data on mount
   useEffect(() => {

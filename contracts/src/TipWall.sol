@@ -48,54 +48,44 @@ contract TipWall {
     // Write: send an ETH tip + message
     // -----------------------------
     function tip(string calldata message) external payable {
-        // TODO 1: Reject empty message
-        //   Hint: bytes(message).length == 0
-        //
-        // TODO 2: Enforce max message length (MAX_MESSAGE_LENGTH)
-        //
-        // TODO 3 (optional but recommended): reject msg.value == 0
-        //
-        // TODO 4: Store the tip in the array
-        //   Hint: tips.push(Tip({ from: ..., amount: ..., timestamp: ..., message: ... }))
-        //
-        // TODO 5: Update totalTipped
-        //
-        // TODO 6: Emit NewTip
-        //   Hint: emit NewTip(msg.sender, msg.value, uint40(block.timestamp), message);
+        uint256 length = bytes(message).length;
+        if (length == 0) revert EmptyMessage();
+        if (length > MAX_MESSAGE_LENGTH) revert MessageTooLong(length, MAX_MESSAGE_LENGTH);
+        if (msg.value == 0) revert ZeroTip();
+
+        tips.push(Tip({
+            from: msg.sender,
+            amount: msg.value,
+            timestamp: uint40(block.timestamp),
+            message: message
+        }));
+
+        totalTipped += msg.value;
+        emit NewTip(msg.sender, msg.value, uint40(block.timestamp), message);
     }
 
     // -----------------------------
     // Reads for the frontend
     // -----------------------------
     function tipCount() external view returns (uint256) {
-        // TODO: return how many tips exist
-        // Hint: tips.length
-        return 0;
+        return tips.length;
     }
 
     function getTip(uint256 i) external view returns (Tip memory) {
-        // TODO: return the i-th tip
-        // Hint: return tips[i];
-        Tip memory t;
-        return t;
+        return tips[i];
     }
 
     // -----------------------------
     // Owner: withdraw contract balance
     // -----------------------------
     function withdraw() external {
-        // TODO 1: only owner can withdraw
-        //   Hint: if (msg.sender != owner) revert NotOwner();
-        //
-        // TODO 2: get current balance
-        //   Hint: uint256 amount = address(this).balance;
-        //
-        // TODO 3: send ETH to owner using .call
-        //   Hint:
-        //     (bool ok, ) = payable(owner).call{value: amount}("");
-        //     require(ok, "withdraw failed");
-        //
-        // TODO 4: emit Withdraw(owner, amount);
+        if (msg.sender != owner) revert NotOwner();
+
+        uint256 amount = address(this).balance;
+        (bool ok, ) = payable(owner).call{value: amount}("");
+        require(ok, "withdraw failed");
+
+        emit Withdraw(owner, amount);
     }
 
     // Optional helper (nice for debugging in the UI)
