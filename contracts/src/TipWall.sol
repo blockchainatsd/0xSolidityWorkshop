@@ -49,7 +49,8 @@ contract TipWall {
     // -----------------------------
     function tip(string calldata message) external payable {
         // TODO 1: Reject empty message
-        //   Hint: bytes(message).length == 0
+        //   Hint: use bytes(message).length to get the length of the message
+        //   Hint: use revert to reject
         //
         // TODO 2: Enforce max message length (MAX_MESSAGE_LENGTH)
         //
@@ -61,7 +62,7 @@ contract TipWall {
         // TODO 5: Update totalTipped
         //
         // TODO 6: Emit NewTip
-        //   Hint: emit NewTip(msg.sender, msg.value, uint40(block.timestamp), message);
+        //   Hint: use uint40(block.timestamp) for current time
     }
 
     // -----------------------------
@@ -75,7 +76,6 @@ contract TipWall {
 
     function getTip(uint256 i) external view returns (Tip memory) {
         // TODO: return the i-th tip
-        // Hint: return tips[i];
         Tip memory t;
         return t;
     }
@@ -85,17 +85,17 @@ contract TipWall {
     // -----------------------------
     function withdraw() external {
         // TODO 1: only owner can withdraw
-        //   Hint: if (msg.sender != owner) revert NotOwner();
+        //   Hint: check msg.sender
         //
         // TODO 2: get current balance
-        //   Hint: uint256 amount = address(this).balance;
+        //   Hint: address(this).balance is the current balance
         //
         // TODO 3: send ETH to owner using .call
         //   Hint:
         //     (bool ok, ) = payable(owner).call{value: amount}("");
         //     require(ok, "withdraw failed");
         //
-        // TODO 4: emit Withdraw(owner, amount);
+        // TODO 4: emit Withdraw event
     }
 
     // Optional helper (nice for debugging in the UI)

@@ -51,12 +51,12 @@ function App() {
       return;
     }
 
-    // TODO: Implement reading contract state
+    // TODO: Implement reading contract state, see what needs to be set below
     // Example:
     // const total = await publicClient.readContract({
-    //   address: CONTRACT_ADDRESS,
+    //   address,
     //   abi,
-    //   functionName: 'totalTipped',
+    //   functionName,
     // });
     // setTotalTipped(total as bigint);
     
@@ -96,19 +96,19 @@ function App() {
     setStatus('Sending tip...');
 
     try {
-      // TODO: Implement sending a tip
+      // TODO: Implement sending a tip, see what needs to be set below
       // const walletClient = await createWalletClientFromProvider();
       // const hash = await walletClient.writeContract({
-      //   address: CONTRACT_ADDRESS,
+      //   address,
       //   abi,
-      //   functionName: 'tip',
-      //   args: [message],
-      //   value: parseEther(amount),
+      //   functionName,
+      //   args,
+      //   value,
       //   account,
       // });
       // 
       // setStatus('Waiting for confirmation...');
-      // await publicClient.waitForTransactionReceipt({ hash });
+      // TODO: wait for confirmation of hash
       // setStatus('Tip sent!');
       // setMessage('');
       // await loadContractData();
@@ -140,11 +140,11 @@ function App() {
   useEffect(() => {
     if (!CONTRACT_ADDRESS) return;
 
-    // TODO: Implement event subscription
+    // TODO: Implement event subscription, see what needs to be set below
     // const unwatch = publicClient.watchContractEvent({
-    //   address: CONTRACT_ADDRESS,
+    //   address,
     //   abi,
-    //   eventName: 'NewTip',
+    //   eventName,
     //   onLogs: () => {
     //     loadContractData();
     //   },
