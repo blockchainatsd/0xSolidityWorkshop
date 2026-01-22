@@ -50,8 +50,8 @@ scripts/ # helper to copy ABI + deployed address into frontend
 2. Clone your fork:
 
 ```bash
-git clone <your-fork-url>
-cd tipwall-workshop
+git clone https://github.com/blockchainatsd/0xSolidityWorkshop.git
+cd 0xSolidityWorkshop
 ```
 
 ---
