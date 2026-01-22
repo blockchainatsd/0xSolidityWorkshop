@@ -108,7 +108,6 @@ Your job is to implement a `TipWall` contract with:
 **Functions**
 
 - `tip(string calldata message) external payable`
-
   - reverts on empty message
   - reverts if message is too long (suggestion: 80 chars)
   - stores the tip
@@ -118,7 +117,6 @@ Your job is to implement a `TipWall` contract with:
 - `tipCount() external view returns (uint256)`
 - `getTip(uint256 i) external view returns (Tip memory)`
 - `withdraw() external`
-
   - only owner
   - sends full balance to owner
   - emits `Withdraw`
@@ -143,9 +141,9 @@ Your job is to implement a `TipWall` contract with:
 
 ### Key globals
 
-* `msg.sender` = the address calling the function
-* `msg.value` = how much ETH (wei) was sent with the call
-* `block.timestamp` = current block time (seconds)
+- `msg.sender` = the address calling the function
+- `msg.value` = how much ETH (wei) was sent with the call
+- `block.timestamp` = current block time (seconds)
 
 ### Payable functions (receiving ETH)
 
@@ -233,10 +231,10 @@ require(ok, "withdraw failed");
 
 ### Common keywords
 
-* `external` = called from outside (frontend/wallet)
-* `view` = read-only (no state changes)
-* `memory` = temporary data for returning structs/strings
-* `calldata` = read-only function input (cheaper for external functions)
+- `external` = called from outside (frontend/wallet)
+- `view` = read-only (no state changes)
+- `memory` = temporary data for returning structs/strings
+- `calldata` = read-only function input (cheaper for external functions)
 
 ### Run your checks
 
@@ -262,13 +260,13 @@ Fix the contract until tests are green.
 
 ---
 
-### A4) Implement deploy script
+### A4) Review the deploy script
 
-Open:
+The deploy script is already implemented at:
 
 - `contracts/script/Deploy.s.sol`
 
-Implement a Foundry script that deploys `TipWall` using `vm.startBroadcast()` / `vm.stopBroadcast()`.
+It uses `vm.startBroadcast()` / `vm.stopBroadcast()` to deploy the TipWall contract and logs the deployed address.
 
 ---
 
@@ -303,7 +301,6 @@ This should:
 
 - copy ABI to `frontend/src/abi/TipWall.json`
 - write the deployed address to `frontend/.env.local` as:
-
   - `VITE_CONTRACT_ADDRESS=0x...`
 
 If this fails, you probably didn’t deploy with `--broadcast`.
@@ -346,7 +343,6 @@ Build a single-page app with:
 
 - “Connect Wallet” button
 - Display:
-
   - connected address
   - contract address
   - total tipped
@@ -355,22 +351,50 @@ Build a single-page app with:
 **Required behaviors (viem)**
 
 - Read contract state with `publicClient.readContract`:
-
   - `totalTipped()`
   - `tipCount()`
   - `getTip(i)` (loop to fetch tips)
 
 - Send a tip with `walletClient.writeContract`:
-
   - call `tip(message)` with `value: parseEther(amount)`
 
 - Wait for confirmation with `publicClient.waitForTransactionReceipt`
 - Live updates:
-
   - subscribe to `NewTip` with `publicClient.watchContractEvent`
   - update the UI when new tips come in
 
 > **Goal:** You can tip from the UI and see your message show up immediately.
+
+---
+
+### Viem Example Code
+
+Not sure how to use viem? Check out the example scripts in `frontend/src/examples/`:
+
+| File               | Description                                                        |
+| ------------------ | ------------------------------------------------------------------ |
+| `readContract.ts`  | Read contract state (`totalTipped`, `tipCount`, `getTip`, `owner`) |
+| `writeContract.ts` | Send transactions (`sendTip`, `withdraw`)                          |
+| `watchEvents.ts`   | Subscribe to real-time events (`NewTip`, `Withdraw`)               |
+
+**Usage example:**
+
+```typescript
+import { getTotalTipped, getAllTips } from "./examples/readContract";
+import { sendTipAndWait } from "./examples/writeContract";
+import { watchNewTips } from "./examples/watchEvents";
+
+// Read total tipped
+const total = await getTotalTipped();
+
+// Send a tip
+await sendTipAndWait("Hello world!", "0.01");
+
+// Watch for new tips in real-time
+const unwatch = watchNewTips((tip) => {
+  console.log("New tip:", tip);
+});
+```
 
 ---
 
@@ -425,17 +449,14 @@ Now you’ll have test ETH to send tips.
 Pick 1–2 if you finish early:
 
 - **Owner withdraw UI**
-
   - Read `owner()`
   - Show “Withdraw” only if `account === owner`
   - Call `withdraw()`
 
 - **My tips filter**
-
   - Toggle to only show tips where `from === account`
 
 - **Better UX**
-
   - Disable button while tx pending
   - Show “pending/confirmed”
   - Display human-readable timestamp
@@ -447,7 +468,6 @@ Pick 1–2 if you finish early:
 **Contract address is undefined**
 
 - You skipped deploy or sync. Re-run:
-
   1. deploy with `--broadcast`
   2. `node scripts/sync.mjs`
 
