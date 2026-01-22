@@ -201,25 +201,13 @@ function App() {
       address: CONTRACT_ADDRESS,
       abi,
       eventName: 'NewTip',
-      onLogs: (logs) => {
-        logs.forEach((log) => {
-          const { from, amount, timestamp, message } = log.args as {
-            from: `0x${string}`;
-            amount: bigint;
-            timestamp: bigint;
-            message: string;
-          };
-
-          const newTip: Tip = { from, amount, timestamp, message };
-
-          setTips((prev) => [...prev, newTip]);
-          setTotalTipped((prev) => prev + amount);
-        });
+      onLogs: () => {
+        loadContractData();
       },
     });
 
     return () => unwatch();
-  }, [CONTRACT_ADDRESS]);
+  }, [CONTRACT_ADDRESS, loadContractData]);
 
   // Load data on mount
   useEffect(() => {
