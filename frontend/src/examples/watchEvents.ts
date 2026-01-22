@@ -2,6 +2,8 @@
  * Example: Watching contract events with viem
  * 
  * This file demonstrates how to subscribe to real-time events from the TipWall contract.
+ * 
+ * NOTE: This requires the ABI to be synced first by running `node scripts/sync.mjs`
  */
 
 import { publicClient } from '../viem';
@@ -11,10 +13,11 @@ import tipWallAbi from '../abi/TipWall.json';
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS as `0x${string}`;
 
 // Type definitions for event arguments
+// Note: timestamp is bigint because Solidity uint40 is returned as bigint by viem
 interface NewTipArgs {
   from: `0x${string}`;
   amount: bigint;
-  timestamp: number;
+  timestamp: bigint;
   message: string;
 }
 
@@ -32,6 +35,15 @@ interface WithdrawArgs {
 export function watchNewTips(
   onNewTip: (tip: NewTipArgs) => void
 ): () => void {
+  if (!CONTRACT_ADDRESS) {
+    console.error('Contract address not set. Run sync.mjs first.');
+    return () => {};
+  }
+  if (!tipWallAbi || (Array.isArray(tipWallAbi) && tipWallAbi.length === 0)) {
+    console.error('ABI not loaded. Run sync.mjs first.');
+    return () => {};
+  }
+  
   const unwatch = publicClient.watchContractEvent({
     address: CONTRACT_ADDRESS,
     abi: tipWallAbi,
@@ -59,6 +71,15 @@ export function watchNewTips(
 export function watchWithdrawals(
   onWithdraw: (data: WithdrawArgs) => void
 ): () => void {
+  if (!CONTRACT_ADDRESS) {
+    console.error('Contract address not set. Run sync.mjs first.');
+    return () => {};
+  }
+  if (!tipWallAbi || (Array.isArray(tipWallAbi) && tipWallAbi.length === 0)) {
+    console.error('ABI not loaded. Run sync.mjs first.');
+    return () => {};
+  }
+  
   const unwatch = publicClient.watchContractEvent({
     address: CONTRACT_ADDRESS,
     abi: tipWallAbi,

@@ -10,10 +10,11 @@ import './App.css';
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS as `0x${string}` | undefined;
 
 // Tip type matching the contract struct
+// Note: timestamp is bigint because Solidity uint40 is returned as bigint by viem
 interface Tip {
   from: `0x${string}`;
   amount: bigint;
-  timestamp: number;
+  timestamp: bigint;
   message: string;
 }
 
@@ -263,7 +264,7 @@ function App() {
                 </div>
                 <p className="tip-message">{tip.message}</p>
                 <span className="tip-time">
-                  {new Date(tip.timestamp * 1000).toLocaleString()}
+                  {new Date(Number(tip.timestamp) * 1000).toLocaleString()}
                 </span>
               </li>
             ))}

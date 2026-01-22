@@ -2,6 +2,8 @@
  * Example: Writing to contract with viem (sending transactions)
  * 
  * This file demonstrates how to use viem to send transactions to the TipWall contract.
+ * 
+ * NOTE: This requires the ABI to be synced first by running `node scripts/sync.mjs`
  */
 
 import { parseEther } from 'viem';
@@ -19,11 +21,21 @@ const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS as `0x${string}`;
  * @returns The transaction hash
  */
 export async function sendTip(message: string, amountEth: string): Promise<`0x${string}`> {
+  if (!CONTRACT_ADDRESS) {
+    throw new Error('Contract address not set. Run sync.mjs first.');
+  }
+  if (!tipWallAbi || (Array.isArray(tipWallAbi) && tipWallAbi.length === 0)) {
+    throw new Error('ABI not loaded. Run sync.mjs first.');
+  }
+  
   // Get wallet client from browser provider (MetaMask)
   const walletClient = await createWalletClientFromProvider();
   
   // Get the connected account
   const [account] = await walletClient.getAddresses();
+  if (!account) {
+    throw new Error('No account connected. Please connect your wallet first.');
+  }
   
   // Send the transaction
   const txHash = await walletClient.writeContract({
@@ -67,8 +79,18 @@ export async function sendTipAndWait(message: string, amountEth: string) {
  * @returns The transaction hash
  */
 export async function withdraw(): Promise<`0x${string}`> {
+  if (!CONTRACT_ADDRESS) {
+    throw new Error('Contract address not set. Run sync.mjs first.');
+  }
+  if (!tipWallAbi || (Array.isArray(tipWallAbi) && tipWallAbi.length === 0)) {
+    throw new Error('ABI not loaded. Run sync.mjs first.');
+  }
+  
   const walletClient = await createWalletClientFromProvider();
   const [account] = await walletClient.getAddresses();
+  if (!account) {
+    throw new Error('No account connected. Please connect your wallet first.');
+  }
   
   const txHash = await walletClient.writeContract({
     address: CONTRACT_ADDRESS,
