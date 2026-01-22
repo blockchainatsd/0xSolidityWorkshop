@@ -235,6 +235,7 @@ function App() {
       {account && owner && account.toLowerCase() === owner.toLowerCase() && (
         <section className="withdraw-section">
           <h2>Owner Controls</h2>
+          <p className="balance">Contract Balance: {formatEther(contractBalance)} ETH</p>
           <button onClick={handleWithdraw} className="withdraw-btn">
             Withdraw Balance
           </button>
